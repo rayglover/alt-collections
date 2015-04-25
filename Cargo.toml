@@ -5,3 +5,6 @@ authors = ["ray glover <ray@rayglover.net>"]
 
 [dependencies]
 rand = "0.3"
+
+[features]
+std = []
