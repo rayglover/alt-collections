@@ -1480,8 +1480,11 @@ impl BitSet {
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn union<'a>(&'a self, other: &'a BitSet) -> Union<'a> {
         fn or(w1: u32, w2: u32) -> u32 { w1 | w2 }
-        Union(TwoBitPositions::from_blocks(
-            self.bit_vec.blocks(), other.bit_vec.blocks(), or))
+        Union(SetIter::from_blocks(TwoBitPositions {
+            set: self.bit_vec.blocks(),
+            other: other.bit_vec.blocks(), 
+            merge: or,
+        }))
     }
 
     /// Iterator over each usize stored in `self` intersect `other`.
@@ -1506,8 +1509,12 @@ impl BitSet {
     pub fn intersection<'a>(&'a self, other: &'a BitSet) -> Intersection<'a> {
         fn bitand(w1: u32, w2: u32) -> u32 { w1 & w2 }
         let min = cmp::min(self.bit_vec.len(), other.bit_vec.len());
-        Intersection(TwoBitPositions::from_blocks(
-            self.bit_vec.blocks(), other.bit_vec.blocks(), bitand).take(min))
+        
+        Intersection(SetIter::from_blocks(TwoBitPositions {
+            set: self.bit_vec.blocks(),
+            other: other.bit_vec.blocks(), 
+            merge: bitand,
+        }).take(min))
     }
 
     /// Iterator over each usize stored in the `self` setminus `other`.
@@ -1538,8 +1545,12 @@ impl BitSet {
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn difference<'a>(&'a self, other: &'a BitSet) -> Difference<'a> {
         fn diff(w1: u32, w2: u32) -> u32 { w1 & !w2 }
-        Difference(TwoBitPositions::from_blocks(
-            self.bit_vec.blocks(), other.bit_vec.blocks(), diff))
+        
+        Difference(SetIter::from_blocks(TwoBitPositions {
+            set: self.bit_vec.blocks(),
+            other: other.bit_vec.blocks(), 
+            merge: diff,
+        }))
     }
 
     /// Iterator over each u32 stored in the symmetric difference of `self` and `other`.
@@ -1564,8 +1575,12 @@ impl BitSet {
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn symmetric_difference<'a>(&'a self, other: &'a BitSet) -> SymmetricDifference<'a> {
         fn bitxor(w1: u32, w2: u32) -> u32 { w1 ^ w2 }
-        SymmetricDifference(TwoBitPositions::from_blocks(
-            self.bit_vec.blocks(), other.bit_vec.blocks(), bitxor))
+        
+        SymmetricDifference(SetIter::from_blocks(TwoBitPositions {
+            set: self.bit_vec.blocks(),
+            other: other.bit_vec.blocks(), 
+            merge: bitxor,
+        }))
     }
 
     /// Unions in-place with the specified other bit vector.
@@ -1759,7 +1774,6 @@ impl BitSet {
         }
 
         self.bit_vec.set(*value, false);
-
         return true;
     }
 }
@@ -1792,13 +1806,15 @@ impl hash::Hash for BitSet {
 /// An iterator for `BitSet`.
 #[derive(Clone)]
 #[stable(feature = "rust1", since = "1.0.0")]
-pub struct SetIter<'a> {
+pub struct SetIter<T> where
+    T: Iterator<Item=u32> {
     head: u32, 
     head_offset: usize,
-    tail: Blocks<'a>
+    tail: T
 }
-impl<'a> SetIter<'a> {
-    fn from_blocks(mut blocks: Blocks<'a>) -> SetIter<'a> {
+impl<'a, T> SetIter<T> where
+    T: Iterator<Item=u32> {
+    fn from_blocks(mut blocks: T) -> SetIter<T> {
         let w = blocks.next().unwrap_or(0);
         SetIter {tail: blocks, head: w, head_offset: 0}
     }
@@ -1809,52 +1825,35 @@ impl<'a> SetIter<'a> {
 struct TwoBitPositions<'a> {
     set: Blocks<'a>,
     other: Blocks<'a>,
-    merge: fn(u32, u32) -> u32,
-    head: u32,
-    head_offset: usize
-}
-impl<'a> TwoBitPositions<'a> {
-    fn from_blocks(mut a: Blocks<'a>, mut b:Blocks<'a>, merge: fn(u32, u32) -> u32) -> TwoBitPositions<'a> {
-        let a1 = a.next().unwrap_or(0);
-        let b1 = b.next().unwrap_or(0);
-
-        TwoBitPositions {
-            set: a, 
-            other: b, 
-            merge: merge,
-            head: merge(a1, b1),
-            head_offset: 0
-        }
-    }
+    merge: fn(u32, u32) -> u32
 }
 
 #[derive(Clone)]
 #[stable(feature = "rust1", since = "1.0.0")]
-pub struct Union<'a>(TwoBitPositions<'a>);
+pub struct Union<'a>(SetIter<TwoBitPositions<'a>>);
 #[derive(Clone)]
 #[stable(feature = "rust1", since = "1.0.0")]
-pub struct Intersection<'a>(Take<TwoBitPositions<'a>>);
+pub struct Intersection<'a>(Take<SetIter<TwoBitPositions<'a>>>);
 #[derive(Clone)]
 #[stable(feature = "rust1", since = "1.0.0")]
-pub struct Difference<'a>(TwoBitPositions<'a>);
+pub struct Difference<'a>(SetIter<TwoBitPositions<'a>>);
 #[derive(Clone)]
 #[stable(feature = "rust1", since = "1.0.0")]
-pub struct SymmetricDifference<'a>(TwoBitPositions<'a>);
+pub struct SymmetricDifference<'a>(SetIter<TwoBitPositions<'a>>);
 
 #[stable(feature = "rust1", since = "1.0.0")]
-impl<'a> Iterator for SetIter<'a> {
+impl<'a, T> Iterator for SetIter<T> where T: Iterator<Item=u32> {
     type Item = usize;
 
     fn next(&mut self) -> Option<usize> {
         while self.head == 0 {
             match self.tail.next() {
-                Some(w) => { self.head = w; },
+                Some(w) => self.head = w,
                 _ => return None
             }
             self.head_offset += u32::BITS;
         }
 
-        // let t = self.head & -self.head;
         let t = self.head & !self.head + 1;
         // remove the least significant bit
         self.head &= self.head - 1;
@@ -1873,32 +1872,25 @@ impl<'a> Iterator for SetIter<'a> {
 
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> Iterator for TwoBitPositions<'a> {
-    type Item = usize;
+    type Item = u32;
 
-    fn next(&mut self) -> Option<usize> {
-        while self.head == 0 {
-            match (self.set.next(), self.other.next()) {
-                (Some(a), Some(b)) => { self.head = (self.merge)(a, b); },
-                (Some(a), None) => { self.head = (self.merge)(a, 0); },
-                (None, Some(b)) => { self.head = (self.merge)(0, b); },
-                _ => return None
-            }
-            self.head_offset += u32::BITS;
+    fn next(&mut self) -> Option<u32> {
+        match (self.set.next(), self.other.next()) {
+            (Some(a), Some(b)) => Some((self.merge)(a, b)),
+            (Some(a), None) => Some((self.merge)(a, 0)),
+            (None, Some(b)) => Some((self.merge)(0, b)),
+            _ => return None
         }
-
-        // let t = self.head & -self.head;
-        let t = self.head & !self.head + 1;
-        // remove the least significant bit
-        self.head &= self.head - 1;
-        // return index of lsb
-        Some(self.head_offset + (u32::count_ones(t-1) as usize))
     }
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        // todo
-        (0, Some(0))
-    }
+        let (a, al) = self.set.size_hint();
+        let (b, bl) = self.set.size_hint();
+
+        assert_eq!(a, b);
+        (a, cmp::max(al, bl))
+    }   
 }
 
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -1936,9 +1928,9 @@ impl<'a> Iterator for SymmetricDifference<'a> {
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> IntoIterator for &'a BitSet {
     type Item = usize;
-    type IntoIter = SetIter<'a>;
+    type IntoIter = SetIter<Blocks<'a>>;
 
-    fn into_iter(self) -> SetIter<'a> {
+    fn into_iter(self) -> SetIter<Blocks<'a>> {
         self.iter()
     }
 }
