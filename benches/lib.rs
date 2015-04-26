@@ -14,7 +14,7 @@ use test::{Bencher, black_box};
 #[cfg(feature = "std")] use std::collections::{BitSet, BitVec};
 #[cfg(not(feature = "std"))] use faster_bitset::{BitSet, BitVec};
 
-const N : usize = 1000000;
+const N : usize = 500_000;
 const BENCH_BITS : usize = 1 << 14;
 
 
