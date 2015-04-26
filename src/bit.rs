@@ -1456,10 +1456,7 @@ impl BitSet {
     #[inline]
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn iter(&self) -> bit_set::Iter {
-        let mut bs = self.bit_vec.blocks();
-        let x = bs.next().unwrap_or(0);
-
-        SetIter {tail: bs, head: x, head_offset: 0}
+        SetIter::from_blocks(self.bit_vec.blocks())
     }
 
     /// Iterator over each u32 stored in `self` union `other`.
@@ -1483,14 +1480,8 @@ impl BitSet {
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn union<'a>(&'a self, other: &'a BitSet) -> Union<'a> {
         fn or(w1: u32, w2: u32) -> u32 { w1 | w2 }
-
-        Union(TwoBitPositions {
-            set: self,
-            other: other,
-            merge: or,
-            current_word: 0,
-            next_idx: 0
-        })
+        Union(TwoBitPositions::from_blocks(
+            self.bit_vec.blocks(), other.bit_vec.blocks(), or))
     }
 
     /// Iterator over each usize stored in `self` intersect `other`.
@@ -1515,13 +1506,8 @@ impl BitSet {
     pub fn intersection<'a>(&'a self, other: &'a BitSet) -> Intersection<'a> {
         fn bitand(w1: u32, w2: u32) -> u32 { w1 & w2 }
         let min = cmp::min(self.bit_vec.len(), other.bit_vec.len());
-        Intersection(TwoBitPositions {
-            set: self,
-            other: other,
-            merge: bitand,
-            current_word: 0,
-            next_idx: 0
-        }.take(min))
+        Intersection(TwoBitPositions::from_blocks(
+            self.bit_vec.blocks(), other.bit_vec.blocks(), bitand).take(min))
     }
 
     /// Iterator over each usize stored in the `self` setminus `other`.
@@ -1552,14 +1538,8 @@ impl BitSet {
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn difference<'a>(&'a self, other: &'a BitSet) -> Difference<'a> {
         fn diff(w1: u32, w2: u32) -> u32 { w1 & !w2 }
-
-        Difference(TwoBitPositions {
-            set: self,
-            other: other,
-            merge: diff,
-            current_word: 0,
-            next_idx: 0
-        })
+        Difference(TwoBitPositions::from_blocks(
+            self.bit_vec.blocks(), other.bit_vec.blocks(), diff))
     }
 
     /// Iterator over each u32 stored in the symmetric difference of `self` and `other`.
@@ -1584,14 +1564,8 @@ impl BitSet {
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn symmetric_difference<'a>(&'a self, other: &'a BitSet) -> SymmetricDifference<'a> {
         fn bitxor(w1: u32, w2: u32) -> u32 { w1 ^ w2 }
-
-        SymmetricDifference(TwoBitPositions {
-            set: self,
-            other: other,
-            merge: bitxor,
-            current_word: 0,
-            next_idx: 0
-        })
+        SymmetricDifference(TwoBitPositions::from_blocks(
+            self.bit_vec.blocks(), other.bit_vec.blocks(), bitxor))
     }
 
     /// Unions in-place with the specified other bit vector.
@@ -1821,17 +1795,37 @@ impl hash::Hash for BitSet {
 pub struct SetIter<'a> {
     head: u32, 
     head_offset: usize,
-    tail: Cloned<slice::Iter<'a, u32>>
+    tail: Blocks<'a>
+}
+impl<'a> SetIter<'a> {
+    fn from_blocks(mut blocks: Blocks<'a>) -> SetIter<'a> {
+        let w = blocks.next().unwrap_or(0);
+        SetIter {tail: blocks, head: w, head_offset: 0}
+    }
 }
 
 /// An iterator combining two `BitSet` iterators.
 #[derive(Clone)]
 struct TwoBitPositions<'a> {
-    set: &'a BitSet,
-    other: &'a BitSet,
+    set: Blocks<'a>,
+    other: Blocks<'a>,
     merge: fn(u32, u32) -> u32,
-    current_word: u32,
-    next_idx: usize
+    head: u32,
+    head_offset: usize
+}
+impl<'a> TwoBitPositions<'a> {
+    fn from_blocks(mut a: Blocks<'a>, mut b:Blocks<'a>, merge: fn(u32, u32) -> u32) -> TwoBitPositions<'a> {
+        let a1 = a.next().unwrap_or(0);
+        let b1 = b.next().unwrap_or(0);
+
+        TwoBitPositions {
+            set: a, 
+            other: b, 
+            merge: merge,
+            head: merge(a1, b1),
+            head_offset: 0
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -1854,12 +1848,10 @@ impl<'a> Iterator for SetIter<'a> {
     fn next(&mut self) -> Option<usize> {
         while self.head == 0 {
             match self.tail.next() {
-                Some(w) => { 
-                    self.head = w;
-                    self.head_offset += u32::BITS;
-                },
-                None => return None
+                Some(w) => { self.head = w; },
+                _ => return None
             }
+            self.head_offset += u32::BITS;
         }
 
         // let t = self.head & -self.head;
@@ -1884,36 +1876,28 @@ impl<'a> Iterator for TwoBitPositions<'a> {
     type Item = usize;
 
     fn next(&mut self) -> Option<usize> {
-        while self.next_idx < self.set.bit_vec.len() ||
-              self.next_idx < self.other.bit_vec.len() {
-            let bit_idx = self.next_idx % u32::BITS;
-            if bit_idx == 0 {
-                let s_bit_vec = &self.set.bit_vec;
-                let o_bit_vec = &self.other.bit_vec;
-                // Merging the two words is a bit of an awkward dance since
-                // one BitVec might be longer than the other
-                let word_idx = self.next_idx / u32::BITS;
-                let w1 = if word_idx < s_bit_vec.storage.len() {
-                             s_bit_vec.storage[word_idx]
-                         } else { 0 };
-                let w2 = if word_idx < o_bit_vec.storage.len() {
-                             o_bit_vec.storage[word_idx]
-                         } else { 0 };
-                self.current_word = (self.merge)(w1, w2);
+        while self.head == 0 {
+            match (self.set.next(), self.other.next()) {
+                (Some(a), Some(b)) => { self.head = (self.merge)(a, b); },
+                (Some(a), None) => { self.head = (self.merge)(a, 0); },
+                (None, Some(b)) => { self.head = (self.merge)(0, b); },
+                _ => return None
             }
-
-            self.next_idx += 1;
-            if self.current_word & (1 << bit_idx) != 0 {
-                return Some(self.next_idx - 1);
-            }
+            self.head_offset += u32::BITS;
         }
-        return None;
+
+        // let t = self.head & -self.head;
+        let t = self.head & !self.head + 1;
+        // remove the least significant bit
+        self.head &= self.head - 1;
+        // return index of lsb
+        Some(self.head_offset + (u32::count_ones(t-1) as usize))
     }
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let cap = cmp::max(self.set.bit_vec.len(), self.other.bit_vec.len());
-        (0, Some(cap - self.next_idx))
+        // todo
+        (0, Some(0))
     }
 }
 
