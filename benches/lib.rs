@@ -24,12 +24,12 @@ fn rng() -> rand::IsaacRng {
 }
 
 fn create_rnd(n: usize, p:f32) -> (BitSet, usize) {
-    let mut r = rng();
+    let mut rng = rand::thread_rng();
     let mut s = BitSet::with_capacity(n);
     let mut k = 0;
 
     for i in 0..n-1 {
-        if r.next_f32() < p {
+        if rng.gen::<f32>() < p {
             s.insert(i);
             k += 1;
         }
@@ -83,14 +83,48 @@ fn copy_dense(b: &mut Bencher) {
 
 #[bench]
 fn intersect_sparse(b: &mut Bencher) {
-    let (s, _) = create_rnd(N, 0.1);
-    let (s2, _) = create_rnd(N, 0.1);
+    let (s, k) = create_rnd(N, 0.1);
+    let (s2, k2) = create_rnd(N, 0.1);
 
     b.iter(|| {
-        let k2 = s.intersection(&s2).count();
-        black_box(&k2);
+        let k3 = s.intersection(&s2).count();
+        assert!(k3 <= k2 && k3 <= k);
     })
 }
+
+#[bench]
+fn intersect_dense(b: &mut Bencher) {
+    let (s, k) = create_rnd(N, 0.5);
+    let (s2, k2) = create_rnd(N, 0.5);
+
+    b.iter(|| {
+        let k3 = s.intersection(&s2).count();
+        assert!(k3 <= k2 && k3 <= k);
+    })
+}
+
+#[bench]
+fn union_sparse(b: &mut Bencher) {
+    let (s, k) = create_rnd(N, 0.1);
+    let (s2, k2) = create_rnd(N, 0.1);
+
+    b.iter(|| {
+        let k3 = s.union(&s2).count();
+        assert!(k3 >= k2 && k3 >= k);
+    })
+}
+
+#[bench]
+fn union_dense(b: &mut Bencher) {
+    let (s, k) = create_rnd(N, 0.5);
+    let (s2, k2) = create_rnd(N, 0.5);
+
+    b.iter(|| {
+        let k3 = s.union(&s2).count();
+        assert!(k3 >= k2 && k3 >= k);
+    })
+}
+
 
 #[bench]
 fn bench_usize_small(b: &mut Bencher) {
