@@ -104,12 +104,11 @@ pub type Blocks<'a> = Cloned<slice::Iter<'a, u32>>;
 type MutBlocks<'a> = slice::IterMut<'a, u32>;
 type MatchWords<'a> = Chain<Enumerate<Blocks<'a>>, Skip<Take<Enumerate<Repeat<u32>>>>>;
 
+#[inline]
 fn reverse_bits(byte: u8) -> u8 {
-    let mut result = 0;
-    for i in 0..u8::BITS {
-        result |= ((byte >> i) & 1) << (u8::BITS - 1 - i);
-    }
-    result
+    // Rich Schroeppel in the Programming Hacks section of Beeler, M., Gosper, R. W., 
+    // and Schroeppel, R. HAKMEM. MIT AI Memo 239, Feb. 29, 1972
+    ((byte as u64 * 0x0202020202 & 0x010884422010) % 1023) as u8
 }
 
 // Take two BitVec's, and return iterators of their words, where the shorter one

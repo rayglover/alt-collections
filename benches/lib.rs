@@ -38,6 +38,21 @@ fn create_rnd(n: usize, p:f32) -> (BitSet, usize) {
     (s, k)
 }
 
+#[bench]
+fn from_bytes(b: &mut Bencher) {
+    let mut rng = rand::thread_rng();
+    let mut v = Vec::with_capacity(N / 8);
+    
+    for _ in 0..(N / 8) {
+        v.push(rng.gen::<u8>() as u8)
+    }
+
+    b.iter(|| {
+        let bv = BitVec::from_bytes(&v);
+        black_box(&bv);
+    })
+}
+
 
 #[bench]
 fn count_dense(b: &mut Bencher) {
