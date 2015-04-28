@@ -1,6 +1,5 @@
 #![feature(test)]
-#![feature(collections)]
-#![feature(core)]
+#![feature(core, collections)]
 
 extern crate test;
 extern crate rand;
@@ -52,7 +51,6 @@ fn from_bytes(b: &mut Bencher) {
         black_box(&bv);
     })
 }
-
 
 #[bench]
 fn count_dense(b: &mut Bencher) {
@@ -139,7 +137,6 @@ fn union_dense(b: &mut Bencher) {
         assert!(k3 >= k2 && k3 >= k);
     })
 }
-
 
 #[bench]
 fn bench_usize_small(b: &mut Bencher) {

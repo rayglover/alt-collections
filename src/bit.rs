@@ -39,7 +39,7 @@
 //!
 //! ```
 //! # #![feature(collections, core, step_by)]
-//! use std::collections::{BitSet, BitVec};
+//! use faster_bitset::{BitSet, BitVec};
 //! use std::num::Float;
 //! use std::iter;
 //!
@@ -81,10 +81,6 @@
 //! println!("There are {} primes below {}", num_primes, max_prime);
 //! ```
 
-
-//use core::prelude::*;
-
-
 use std::cmp::Ordering;
 use std::cmp;
 use std::default::Default;
@@ -97,8 +93,6 @@ use std::ops::Index;
 use std::slice;
 use std::{u8, u32, usize};
 use bit_set; //so meta
-
-//use Vec;
 
 pub type Blocks<'a> = Cloned<slice::Iter<'a, u32>>;
 type MutBlocks<'a> = slice::IterMut<'a, u32>;
@@ -1813,8 +1807,8 @@ pub struct SetIter<T> where
 impl<'a, T> SetIter<T> where
     T: Iterator<Item=u32> {
     fn from_blocks(mut blocks: T) -> SetIter<T> {
-        let w = blocks.next().unwrap_or(0);
-        SetIter {tail: blocks, head: w, head_offset: 0}
+        let h = blocks.next().unwrap_or(0);
+        SetIter {tail: blocks, head: h, head_offset: 0}
     }
 }
 
