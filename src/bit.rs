@@ -39,8 +39,7 @@
 //!
 //! ```
 //! # #![feature(collections, core, step_by)]
-//! use faster_bitset::{BitSet, BitVec};
-//! use std::num::Float;
+//! use alt_bitset::{BitSet, BitVec};
 //! use std::iter;
 //!
 //! let max_prime = 10000;
@@ -130,7 +129,7 @@ static FALSE: bool = false;
 ///
 /// ```
 /// # #![feature(collections)]
-/// use faster_bitset::BitVec;
+/// use alt_bitset::BitVec;
 ///
 /// let mut bv = BitVec::from_elem(10, false);
 ///
@@ -152,8 +151,6 @@ static FALSE: bool = false;
 /// println!("{:?}", bv);
 /// println!("total bits set to true: {}", bv.iter().filter(|x| *x).count());
 /// ```
-#[unstable(feature = "collections",
-           reason = "RFC 509")]
 pub struct BitVec {
     /// Internal representation of the bit vector
     storage: Vec<u32>,
@@ -247,10 +244,9 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     /// let mut bv = BitVec::new();
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn new() -> BitVec {
         BitVec { storage: Vec::new(), nbits: 0 }
     }
@@ -262,7 +258,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let mut bv = BitVec::from_elem(10, false);
     /// assert_eq!(bv.len(), 10);
@@ -287,7 +283,6 @@ impl BitVec {
     ///
     /// It is important to note that this function does not specify the
     /// *length* of the returned bitvector, but only the *capacity*.
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn with_capacity(nbits: usize) -> BitVec {
         BitVec {
             storage: Vec::with_capacity(blocks_for_bits(nbits)),
@@ -303,7 +298,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let bv = BitVec::from_bytes(&[0b10100000, 0b00010010]);
     /// assert!(bv.eq_vec(&[true, false, true, false,
@@ -346,7 +341,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let bv = BitVec::from_fn(5, |i| { i % 2 == 0 });
     /// assert!(bv.eq_vec(&[true, false, true, false, true]));
@@ -365,7 +360,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let bv = BitVec::from_bytes(&[0b01100000]);
     /// assert_eq!(bv.get(0), Some(false));
@@ -376,7 +371,6 @@ impl BitVec {
     /// assert_eq!(bv[1], true);
     /// ```
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn get(&self, i: usize) -> Option<bool> {
         if i >= self.nbits {
             return None;
@@ -398,15 +392,13 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let mut bv = BitVec::from_elem(5, false);
     /// bv.set(3, true);
     /// assert_eq!(bv[3], true);
     /// ```
     #[inline]
-    #[unstable(feature = "collections",
-               reason = "panic semantics are likely to change in the future")]
     pub fn set(&mut self, i: usize, x: bool) {
         assert!(i < self.nbits);
         let w = i / u32::BITS;
@@ -423,7 +415,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let before = 0b01100000;
     /// let after  = 0b11111111;
@@ -444,7 +436,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let before = 0b01100000;
     /// let after  = 0b10011111;
@@ -473,7 +465,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let a   = 0b01100100;
     /// let b   = 0b01011010;
@@ -504,7 +496,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let a   = 0b01100100;
     /// let b   = 0b01011010;
@@ -535,7 +527,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let a   = 0b01100100;
     /// let b   = 0b01011010;
@@ -565,7 +557,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let mut bv = BitVec::from_elem(5, true);
     /// assert_eq!(bv.all(), true);
@@ -590,13 +582,12 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let bv = BitVec::from_bytes(&[0b01110100, 0b10010010]);
     /// assert_eq!(bv.iter().filter(|x| *x).count(), 7);
     /// ```
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn iter(&self) -> Iter {
         Iter { bit_vec: self, next_idx: 0, end_idx: self.nbits }
     }
@@ -607,7 +598,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let mut bv = BitVec::from_elem(10, false);
     /// assert_eq!(bv.none(), true);
@@ -625,7 +616,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let mut bv = BitVec::from_elem(10, false);
     /// assert_eq!(bv.any(), false);
@@ -647,7 +638,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let mut bv = BitVec::from_elem(3, true);
     /// bv.set(1, false);
@@ -695,7 +686,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let bv = BitVec::from_bytes(&[0b10100000]);
     ///
@@ -716,13 +707,12 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let mut bv = BitVec::from_bytes(&[0b01001011]);
     /// bv.truncate(2);
     /// assert!(bv.eq_vec(&[false, true]));
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn truncate(&mut self, len: usize) {
         if len < self.len() {
             self.nbits = len;
@@ -743,14 +733,13 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let mut bv = BitVec::from_elem(3, false);
     /// bv.reserve(10);
     /// assert_eq!(bv.len(), 3);
     /// assert!(bv.capacity() >= 13);
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn reserve(&mut self, additional: usize) {
         let desired_cap = self.len().checked_add(additional).expect("capacity overflow");
         let storage_len = self.storage.len();
@@ -774,14 +763,13 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let mut bv = BitVec::from_elem(3, false);
     /// bv.reserve(10);
     /// assert_eq!(bv.len(), 3);
     /// assert!(bv.capacity() >= 13);
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn reserve_exact(&mut self, additional: usize) {
         let desired_cap = self.len().checked_add(additional).expect("capacity overflow");
         let storage_len = self.storage.len();
@@ -797,14 +785,13 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let mut bv = BitVec::new();
     /// bv.reserve(10);
     /// assert!(bv.capacity() >= 10);
     /// ```
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn capacity(&self) -> usize {
         self.storage.capacity().checked_mul(u32::BITS).unwrap_or(usize::MAX)
     }
@@ -819,7 +806,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let mut bv = BitVec::from_bytes(&[0b01001011]);
     /// bv.grow(2, true);
@@ -870,14 +857,13 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let mut bv = BitVec::from_bytes(&[0b01001001]);
     /// assert_eq!(bv.pop(), Some(true));
     /// assert_eq!(bv.pop(), Some(false));
     /// assert_eq!(bv.len(), 6);
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn pop(&mut self) -> Option<bool> {
         if self.is_empty() {
             None
@@ -901,14 +887,13 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitVec;
+    /// use alt_bitset::BitVec;
     ///
     /// let mut bv = BitVec::new();
     /// bv.push(true);
     /// bv.push(false);
     /// assert!(bv.eq_vec(&[true, false]));
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn push(&mut self, elem: bool) {
         if self.nbits % u32::BITS == 0 {
             self.storage.push(0);
@@ -920,29 +905,22 @@ impl BitVec {
 
     /// Return the total number of bits in this vector
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn len(&self) -> usize { self.nbits }
 
     /// Returns true if there are no bits in this vector
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn is_empty(&self) -> bool { self.len() == 0 }
 
     /// Clears all bits in this vector.
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn clear(&mut self) {
         for w in &mut self.storage { *w = 0; }
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl Default for BitVec {
     #[inline]
     fn default() -> BitVec { BitVec::new() }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl FromIterator<bool> for BitVec {
     fn from_iter<I: IntoIterator<Item=bool>>(iter: I) -> BitVec {
         let mut ret = BitVec::new();
@@ -950,8 +928,6 @@ impl FromIterator<bool> for BitVec {
         ret
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl Extend<bool> for BitVec {
     #[inline]
     fn extend<I: IntoIterator<Item=bool>>(&mut self, iterable: I) {
@@ -963,8 +939,6 @@ impl Extend<bool> for BitVec {
         }
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl Clone for BitVec {
     #[inline]
     fn clone(&self) -> BitVec {
@@ -977,24 +951,18 @@ impl Clone for BitVec {
         self.storage.clone_from(&source.storage);
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl PartialOrd for BitVec {
     #[inline]
     fn partial_cmp(&self, other: &BitVec) -> Option<Ordering> {
         iter::order::partial_cmp(self.iter(), other.iter())
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl Ord for BitVec {
     #[inline]
     fn cmp(&self, other: &BitVec) -> Ordering {
         iter::order::cmp(self.iter(), other.iter())
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl fmt::Debug for BitVec {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         for bit in self {
@@ -1003,8 +971,6 @@ impl fmt::Debug for BitVec {
         Ok(())
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl hash::Hash for BitVec {
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
         self.nbits.hash(state);
@@ -1013,8 +979,6 @@ impl hash::Hash for BitVec {
         }
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl cmp::PartialEq for BitVec {
     #[inline]
     fn eq(&self, other: &BitVec) -> bool {
@@ -1024,20 +988,15 @@ impl cmp::PartialEq for BitVec {
         self.blocks().zip(other.blocks()).all(|(w1, w2)| w1 == w2)
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl cmp::Eq for BitVec {}
 
-/// An iterator for `BitVec`.
-#[stable(feature = "rust1", since = "1.0.0")]
+/// An iterator for `BitVec`
 #[derive(Clone)]
 pub struct Iter<'a> {
     bit_vec: &'a BitVec,
     next_idx: usize,
     end_idx: usize,
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> Iterator for Iter<'a> {
     type Item = bool;
 
@@ -1057,8 +1016,6 @@ impl<'a> Iterator for Iter<'a> {
         (rem, Some(rem))
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> DoubleEndedIterator for Iter<'a> {
     #[inline]
     fn next_back(&mut self) -> Option<bool> {
@@ -1070,11 +1027,7 @@ impl<'a> DoubleEndedIterator for Iter<'a> {
         }
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> ExactSizeIterator for Iter<'a> {}
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> RandomAccessIterator for Iter<'a> {
     #[inline]
     fn indexable(&self) -> usize {
@@ -1090,8 +1043,6 @@ impl<'a> RandomAccessIterator for Iter<'a> {
         }
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> IntoIterator for &'a BitVec {
     type Item = bool;
     type IntoIter = Iter<'a>;
@@ -1112,7 +1063,7 @@ impl<'a> IntoIterator for &'a BitVec {
 ///
 /// ```
 /// # #![feature(collections)]
-/// use faster_bitset::{BitSet, BitVec};
+/// use alt_bitset::{BitSet, BitVec};
 ///
 /// // It's a regular set
 /// let mut s = BitSet::new();
@@ -1141,19 +1092,13 @@ impl<'a> IntoIterator for &'a BitVec {
 /// assert!(bv[3]);
 /// ```
 #[derive(Clone)]
-#[unstable(feature = "collections",
-           reason = "RFC 509")]
 pub struct BitSet {
     bit_vec: BitVec,
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl Default for BitSet {
     #[inline]
     fn default() -> BitSet { BitSet::new() }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl FromIterator<usize> for BitSet {
     fn from_iter<I: IntoIterator<Item=usize>>(iter: I) -> BitSet {
         let mut ret = BitSet::new();
@@ -1161,8 +1106,6 @@ impl FromIterator<usize> for BitSet {
         ret
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl Extend<usize> for BitSet {
     #[inline]
     fn extend<I: IntoIterator<Item=usize>>(&mut self, iter: I) {
@@ -1171,8 +1114,6 @@ impl Extend<usize> for BitSet {
         }
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl PartialOrd for BitSet {
     #[inline]
     fn partial_cmp(&self, other: &BitSet) -> Option<Ordering> {
@@ -1180,8 +1121,6 @@ impl PartialOrd for BitSet {
         iter::order::partial_cmp(a_iter, b_iter)
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl Ord for BitSet {
     #[inline]
     fn cmp(&self, other: &BitSet) -> Ordering {
@@ -1189,8 +1128,6 @@ impl Ord for BitSet {
         iter::order::cmp(a_iter, b_iter)
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl cmp::PartialEq for BitSet {
     #[inline]
     fn eq(&self, other: &BitSet) -> bool {
@@ -1198,8 +1135,6 @@ impl cmp::PartialEq for BitSet {
         iter::order::eq(a_iter, b_iter)
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl cmp::Eq for BitSet {}
 
 impl BitSet {
@@ -1209,12 +1144,11 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitSet;
+    /// use alt_bitset::BitSet;
     ///
     /// let mut s = BitSet::new();
     /// ```
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn new() -> BitSet {
         BitSet { bit_vec: BitVec::new() }
     }
@@ -1226,13 +1160,12 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitSet;
+    /// use alt_bitset::BitSet;
     ///
     /// let mut s = BitSet::with_capacity(100);
     /// assert!(s.capacity() >= 100);
     /// ```
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn with_capacity(nbits: usize) -> BitSet {
         let bit_vec = BitVec::from_elem(nbits, false);
         BitSet::from_bit_vec(bit_vec)
@@ -1244,7 +1177,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::{BitVec, BitSet};
+    /// use alt_bitset::{BitVec, BitSet};
     ///
     /// let bv = BitVec::from_bytes(&[0b01100000]);
     /// let s = BitSet::from_bit_vec(bv);
@@ -1266,13 +1199,12 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitSet;
+    /// use alt_bitset::BitSet;
     ///
     /// let mut s = BitSet::with_capacity(100);
     /// assert!(s.capacity() >= 100);
     /// ```
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn capacity(&self) -> usize {
         self.bit_vec.capacity()
     }
@@ -1288,13 +1220,12 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitSet;
+    /// use alt_bitset::BitSet;
     ///
     /// let mut s = BitSet::new();
     /// s.reserve_len(10);
     /// assert!(s.capacity() >= 10);
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn reserve_len(&mut self, len: usize) {
         let cur_len = self.bit_vec.len();
         if len >= cur_len {
@@ -1315,13 +1246,12 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitSet;
+    /// use alt_bitset::BitSet;
     ///
     /// let mut s = BitSet::new();
     /// s.reserve_len_exact(10);
     /// assert!(s.capacity() >= 10);
     /// ```
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn reserve_len_exact(&mut self, len: usize) {
         let cur_len = self.bit_vec.len();
         if len >= cur_len {
@@ -1335,7 +1265,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitSet;
+    /// use alt_bitset::BitSet;
     ///
     /// let mut s = BitSet::new();
     /// s.insert(0);
@@ -1356,7 +1286,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitSet;
+    /// use alt_bitset::BitSet;
     ///
     /// let mut s = BitSet::new();
     /// s.insert(0);
@@ -1403,7 +1333,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::BitSet;
+    /// use alt_bitset::BitSet;
     ///
     /// let mut s = BitSet::new();
     /// s.insert(32183231);
@@ -1417,7 +1347,6 @@ impl BitSet {
     /// println!("new capacity: {}", s.capacity());
     /// ```
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn shrink_to_fit(&mut self) {
         let bit_vec = &mut self.bit_vec;
         // Obtain original length
@@ -1436,7 +1365,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::{BitVec, BitSet};
+    /// use alt_bitset::{BitVec, BitSet};
     ///
     /// let s = BitSet::from_bit_vec(BitVec::from_bytes(&[0b01001010]));
     ///
@@ -1446,7 +1375,6 @@ impl BitSet {
     /// }
     /// ```
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn iter(&self) -> bit_set::Iter<Blocks> {
         SetIter::from_blocks(self.bit_vec.blocks())
     }
@@ -1458,7 +1386,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::{BitVec, BitSet};
+    /// use alt_bitset::{BitVec, BitSet};
     ///
     /// let a = BitSet::from_bit_vec(BitVec::from_bytes(&[0b01101000]));
     /// let b = BitSet::from_bit_vec(BitVec::from_bytes(&[0b10100000]));
@@ -1469,7 +1397,6 @@ impl BitSet {
     /// }
     /// ```
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn union<'a>(&'a self, other: &'a BitSet) -> Union<'a> {
         fn or(w1: u32, w2: u32) -> u32 { w1 | w2 }
         Union(SetIter::from_blocks(TwoBitPositions {
@@ -1486,7 +1413,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::{BitVec, BitSet};
+    /// use alt_bitset::{BitVec, BitSet};
     ///
     /// let a = BitSet::from_bit_vec(BitVec::from_bytes(&[0b01101000]));
     /// let b = BitSet::from_bit_vec(BitVec::from_bytes(&[0b10100000]));
@@ -1497,7 +1424,6 @@ impl BitSet {
     /// }
     /// ```
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn intersection<'a>(&'a self, other: &'a BitSet) -> Intersection<'a> {
         fn bitand(w1: u32, w2: u32) -> u32 { w1 & w2 }
         let min = cmp::min(self.bit_vec.len(), other.bit_vec.len());
@@ -1516,7 +1442,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::{BitSet, BitVec};
+    /// use alt_bitset::{BitSet, BitVec};
     ///
     /// let a = BitSet::from_bit_vec(BitVec::from_bytes(&[0b01101000]));
     /// let b = BitSet::from_bit_vec(BitVec::from_bytes(&[0b10100000]));
@@ -1534,7 +1460,6 @@ impl BitSet {
     /// }
     /// ```
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn difference<'a>(&'a self, other: &'a BitSet) -> Difference<'a> {
         fn diff(w1: u32, w2: u32) -> u32 { w1 & !w2 }
         
@@ -1553,7 +1478,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::{BitSet, BitVec};
+    /// use alt_bitset::{BitSet, BitVec};
     ///
     /// let a = BitSet::from_bit_vec(BitVec::from_bytes(&[0b01101000]));
     /// let b = BitSet::from_bit_vec(BitVec::from_bytes(&[0b10100000]));
@@ -1564,7 +1489,6 @@ impl BitSet {
     /// }
     /// ```
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn symmetric_difference<'a>(&'a self, other: &'a BitSet) -> SymmetricDifference<'a> {
         fn bitxor(w1: u32, w2: u32) -> u32 { w1 ^ w2 }
         
@@ -1581,7 +1505,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::{BitSet, BitVec};
+    /// use alt_bitset::{BitSet, BitVec};
     ///
     /// let a   = 0b01101000;
     /// let b   = 0b10100000;
@@ -1605,7 +1529,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::{BitSet, BitVec};
+    /// use alt_bitset::{BitSet, BitVec};
     ///
     /// let a   = 0b01101000;
     /// let b   = 0b10100000;
@@ -1630,7 +1554,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::{BitSet, BitVec};
+    /// use alt_bitset::{BitSet, BitVec};
     ///
     /// let a   = 0b01101000;
     /// let b   = 0b10100000;
@@ -1663,7 +1587,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use faster_bitset::{BitSet, BitVec};
+    /// use alt_bitset::{BitSet, BitVec};
     ///
     /// let a   = 0b01101000;
     /// let b   = 0b10100000;
@@ -1683,28 +1607,24 @@ impl BitSet {
 
     /// Return the number of set bits in this set.
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn len(&self) -> usize  {
         self.bit_vec.blocks().fold(0, |acc, n| acc + n.count_ones() as usize)
     }
 
     /// Returns whether there are no bits set in this set
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn is_empty(&self) -> bool {
         self.bit_vec.none()
     }
 
     /// Clears all bits in this set
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn clear(&mut self) {
         self.bit_vec.clear();
     }
 
     /// Returns `true` if this set contains the specified integer.
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn contains(&self, value: &usize) -> bool {
         let bit_vec = &self.bit_vec;
         *value < bit_vec.nbits && bit_vec[*value]
@@ -1713,14 +1633,12 @@ impl BitSet {
     /// Returns `true` if the set has no elements in common with `other`.
     /// This is equivalent to checking for an empty intersection.
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn is_disjoint(&self, other: &BitSet) -> bool {
         self.intersection(other).next().is_none()
     }
 
     /// Returns `true` if the set is a subset of another.
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn is_subset(&self, other: &BitSet) -> bool {
         let self_bit_vec = &self.bit_vec;
         let other_bit_vec = &other.bit_vec;
@@ -1734,14 +1652,12 @@ impl BitSet {
 
     /// Returns `true` if the set is a superset of another.
     #[inline]
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn is_superset(&self, other: &BitSet) -> bool {
         other.is_subset(self)
     }
 
     /// Adds a value to the set. Returns `true` if the value was not already
     /// present in the set.
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn insert(&mut self, value: usize) -> bool {
         if self.contains(&value) {
             return false;
@@ -1759,7 +1675,6 @@ impl BitSet {
 
     /// Removes a value from the set. Returns `true` if the value was
     /// present in the set.
-    #[stable(feature = "rust1", since = "1.0.0")]
     pub fn remove(&mut self, value: &usize) -> bool {
         if !self.contains(value) {
             return false;
@@ -1769,8 +1684,6 @@ impl BitSet {
         return true;
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl fmt::Debug for BitSet {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         try!(write!(fmt, "{{"));
@@ -1785,8 +1698,6 @@ impl fmt::Debug for BitSet {
         write!(fmt, "}}")
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl hash::Hash for BitSet {
     fn hash<H: hash::Hasher>(&self, state: &mut H) {
         for pos in self {
@@ -1797,7 +1708,6 @@ impl hash::Hash for BitSet {
 
 /// An iterator for `BitSet`.
 #[derive(Clone)]
-#[stable(feature = "rust1", since = "1.0.0")]
 pub struct SetIter<T> where
     T: Iterator<Item=u32> {
     head: u32, 
@@ -1821,19 +1731,17 @@ struct TwoBitPositions<'a> {
 }
 
 #[derive(Clone)]
-#[stable(feature = "rust1", since = "1.0.0")]
 pub struct Union<'a>(SetIter<TwoBitPositions<'a>>);
+
 #[derive(Clone)]
-#[stable(feature = "rust1", since = "1.0.0")]
 pub struct Intersection<'a>(Take<SetIter<TwoBitPositions<'a>>>);
+
 #[derive(Clone)]
-#[stable(feature = "rust1", since = "1.0.0")]
 pub struct Difference<'a>(SetIter<TwoBitPositions<'a>>);
+
 #[derive(Clone)]
-#[stable(feature = "rust1", since = "1.0.0")]
 pub struct SymmetricDifference<'a>(SetIter<TwoBitPositions<'a>>);
 
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<'a, T> Iterator for SetIter<T> where T: Iterator<Item=u32> {
     type Item = usize;
 
@@ -1861,8 +1769,6 @@ impl<'a, T> Iterator for SetIter<T> where T: Iterator<Item=u32> {
         }
     }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> Iterator for TwoBitPositions<'a> {
     type Item = u32;
 
@@ -1884,40 +1790,30 @@ impl<'a> Iterator for TwoBitPositions<'a> {
         (a, cmp::max(al, bl))
     }   
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> Iterator for Union<'a> {
     type Item = usize;
 
     #[inline] fn next(&mut self) -> Option<usize> { self.0.next() }
     #[inline] fn size_hint(&self) -> (usize, Option<usize>) { self.0.size_hint() }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> Iterator for Intersection<'a> {
     type Item = usize;
 
     #[inline] fn next(&mut self) -> Option<usize> { self.0.next() }
     #[inline] fn size_hint(&self) -> (usize, Option<usize>) { self.0.size_hint() }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> Iterator for Difference<'a> {
     type Item = usize;
 
     #[inline] fn next(&mut self) -> Option<usize> { self.0.next() }
     #[inline] fn size_hint(&self) -> (usize, Option<usize>) { self.0.size_hint() }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> Iterator for SymmetricDifference<'a> {
     type Item = usize;
 
     #[inline] fn next(&mut self) -> Option<usize> { self.0.next() }
     #[inline] fn size_hint(&self) -> (usize, Option<usize>) { self.0.size_hint() }
 }
-
-#[stable(feature = "rust1", since = "1.0.0")]
 impl<'a> IntoIterator for &'a BitSet {
     type Item = usize;
     type IntoIter = SetIter<Blocks<'a>>;

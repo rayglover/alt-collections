@@ -3,7 +3,7 @@
 
 extern crate test;
 extern crate rand;
-extern crate faster_bitset;
+extern crate alt_bitset;
 
 use std::{u32};
 use rand::*;
@@ -11,7 +11,7 @@ use test::{Bencher, black_box};
 
 
 #[cfg(feature = "std")] use std::collections::{BitSet, BitVec};
-#[cfg(not(feature = "std"))] use faster_bitset::{BitSet, BitVec};
+#[cfg(not(feature = "std"))] use alt_bitset::{BitSet, BitVec};
 
 const N : usize = 500_000;
 const BENCH_BITS : usize = 1 << 14;

@@ -1,10 +1,10 @@
 [package]
-name = "faster_bitset"
+name = "alt_bitset"
 version = "0.0.1"
 authors = ["ray glover <ray@rayglover.net>"]
 
 [dependencies]
-rand = "0.3"
+rand = "0.3.8"
 
 [features]
 std = []
