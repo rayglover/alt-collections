@@ -1767,8 +1767,8 @@ impl<'a, T> Iterator for BlockIter<T> where T: Iterator<Item=u32> {
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         match self.tail.size_hint() {
-            (l, Some(h)) => (l * (u32::BITS as usize), Some(1 + h * (u32::BITS as usize))),
-            n => n
+            (_, Some(h)) => (0, Some(1 + h * (u32::BITS as usize))),
+            _ => (0, None)
         }
     }
 }
