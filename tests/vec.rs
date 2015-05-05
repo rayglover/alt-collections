@@ -13,10 +13,10 @@
 #![feature(collections)] 
 
 extern crate test;
-extern crate alt_bitset; 
+extern crate alt_collections; 
 
 #[cfg(feature = "std")] use std::collections::{BitSet, BitVec};
-#[cfg(not(feature = "std"))] use alt_bitset::{BitSet, BitVec};
+#[cfg(not(feature = "std"))] use alt_collections::{BitSet, BitVec};
 
 use std::u32;
 

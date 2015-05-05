@@ -39,7 +39,7 @@
 //!
 //! ```
 //! # #![feature(collections, core, step_by)]
-//! use alt_bitset::{BitSet, BitVec};
+//! use alt_collections::{BitSet, BitVec};
 //! use std::iter;
 //!
 //! let max_prime = 10000;
@@ -129,7 +129,7 @@ static FALSE: bool = false;
 ///
 /// ```
 /// # #![feature(collections)]
-/// use alt_bitset::BitVec;
+/// use alt_collections::BitVec;
 ///
 /// let mut bv = BitVec::from_elem(10, false);
 ///
@@ -244,7 +244,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     /// let mut bv = BitVec::new();
     /// ```
     pub fn new() -> BitVec {
@@ -258,7 +258,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let mut bv = BitVec::from_elem(10, false);
     /// assert_eq!(bv.len(), 10);
@@ -298,7 +298,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let bv = BitVec::from_bytes(&[0b10100000, 0b00010010]);
     /// assert!(bv.eq_vec(&[true, false, true, false,
@@ -341,7 +341,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let bv = BitVec::from_fn(5, |i| { i % 2 == 0 });
     /// assert!(bv.eq_vec(&[true, false, true, false, true]));
@@ -360,7 +360,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let bv = BitVec::from_bytes(&[0b01100000]);
     /// assert_eq!(bv.get(0), Some(false));
@@ -392,7 +392,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let mut bv = BitVec::from_elem(5, false);
     /// bv.set(3, true);
@@ -415,7 +415,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let before = 0b01100000;
     /// let after  = 0b11111111;
@@ -436,7 +436,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let before = 0b01100000;
     /// let after  = 0b10011111;
@@ -465,7 +465,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let a   = 0b01100100;
     /// let b   = 0b01011010;
@@ -496,7 +496,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let a   = 0b01100100;
     /// let b   = 0b01011010;
@@ -527,7 +527,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let a   = 0b01100100;
     /// let b   = 0b01011010;
@@ -557,7 +557,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let mut bv = BitVec::from_elem(5, true);
     /// assert_eq!(bv.all(), true);
@@ -582,7 +582,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let bv = BitVec::from_bytes(&[0b01110100, 0b10010010]);
     /// assert_eq!(bv.iter().filter(|x| *x).count(), 7);
@@ -598,7 +598,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let mut bv = BitVec::from_elem(10, false);
     /// assert_eq!(bv.none(), true);
@@ -616,7 +616,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let mut bv = BitVec::from_elem(10, false);
     /// assert_eq!(bv.any(), false);
@@ -638,7 +638,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let mut bv = BitVec::from_elem(3, true);
     /// bv.set(1, false);
@@ -686,7 +686,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let bv = BitVec::from_bytes(&[0b10100000]);
     ///
@@ -707,7 +707,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let mut bv = BitVec::from_bytes(&[0b01001011]);
     /// bv.truncate(2);
@@ -733,7 +733,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let mut bv = BitVec::from_elem(3, false);
     /// bv.reserve(10);
@@ -763,7 +763,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let mut bv = BitVec::from_elem(3, false);
     /// bv.reserve(10);
@@ -785,7 +785,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let mut bv = BitVec::new();
     /// bv.reserve(10);
@@ -806,7 +806,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let mut bv = BitVec::from_bytes(&[0b01001011]);
     /// bv.grow(2, true);
@@ -857,7 +857,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let mut bv = BitVec::from_bytes(&[0b01001001]);
     /// assert_eq!(bv.pop(), Some(true));
@@ -887,7 +887,7 @@ impl BitVec {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitVec;
+    /// use alt_collections::BitVec;
     ///
     /// let mut bv = BitVec::new();
     /// bv.push(true);
@@ -1063,7 +1063,7 @@ impl<'a> IntoIterator for &'a BitVec {
 ///
 /// ```
 /// # #![feature(collections)]
-/// use alt_bitset::{BitSet, BitVec};
+/// use alt_collections::{BitSet, BitVec};
 ///
 /// // It's a regular set
 /// let mut s = BitSet::new();
@@ -1144,7 +1144,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitSet;
+    /// use alt_collections::BitSet;
     ///
     /// let mut s = BitSet::new();
     /// ```
@@ -1160,7 +1160,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitSet;
+    /// use alt_collections::BitSet;
     ///
     /// let mut s = BitSet::with_capacity(100);
     /// assert!(s.capacity() >= 100);
@@ -1177,7 +1177,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::{BitVec, BitSet};
+    /// use alt_collections::{BitVec, BitSet};
     ///
     /// let bv = BitVec::from_bytes(&[0b01100000]);
     /// let s = BitSet::from_bit_vec(bv);
@@ -1199,7 +1199,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitSet;
+    /// use alt_collections::BitSet;
     ///
     /// let mut s = BitSet::with_capacity(100);
     /// assert!(s.capacity() >= 100);
@@ -1220,7 +1220,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitSet;
+    /// use alt_collections::BitSet;
     ///
     /// let mut s = BitSet::new();
     /// s.reserve_len(10);
@@ -1246,7 +1246,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitSet;
+    /// use alt_collections::BitSet;
     ///
     /// let mut s = BitSet::new();
     /// s.reserve_len_exact(10);
@@ -1265,7 +1265,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitSet;
+    /// use alt_collections::BitSet;
     ///
     /// let mut s = BitSet::new();
     /// s.insert(0);
@@ -1286,7 +1286,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitSet;
+    /// use alt_collections::BitSet;
     ///
     /// let mut s = BitSet::new();
     /// s.insert(0);
@@ -1333,7 +1333,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::BitSet;
+    /// use alt_collections::BitSet;
     ///
     /// let mut s = BitSet::new();
     /// s.insert(32183231);
@@ -1365,7 +1365,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::{BitVec, BitSet};
+    /// use alt_collections::{BitVec, BitSet};
     ///
     /// let s = BitSet::from_bit_vec(BitVec::from_bytes(&[0b01001010]));
     ///
@@ -1386,7 +1386,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::{BitVec, BitSet};
+    /// use alt_collections::{BitVec, BitSet};
     ///
     /// let a = BitSet::from_bit_vec(BitVec::from_bytes(&[0b01101000]));
     /// let b = BitSet::from_bit_vec(BitVec::from_bytes(&[0b10100000]));
@@ -1413,7 +1413,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::{BitVec, BitSet};
+    /// use alt_collections::{BitVec, BitSet};
     ///
     /// let a = BitSet::from_bit_vec(BitVec::from_bytes(&[0b01101000]));
     /// let b = BitSet::from_bit_vec(BitVec::from_bytes(&[0b10100000]));
@@ -1442,7 +1442,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::{BitSet, BitVec};
+    /// use alt_collections::{BitSet, BitVec};
     ///
     /// let a = BitSet::from_bit_vec(BitVec::from_bytes(&[0b01101000]));
     /// let b = BitSet::from_bit_vec(BitVec::from_bytes(&[0b10100000]));
@@ -1478,7 +1478,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::{BitSet, BitVec};
+    /// use alt_collections::{BitSet, BitVec};
     ///
     /// let a = BitSet::from_bit_vec(BitVec::from_bytes(&[0b01101000]));
     /// let b = BitSet::from_bit_vec(BitVec::from_bytes(&[0b10100000]));
@@ -1505,7 +1505,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::{BitSet, BitVec};
+    /// use alt_collections::{BitSet, BitVec};
     ///
     /// let a   = 0b01101000;
     /// let b   = 0b10100000;
@@ -1529,7 +1529,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::{BitSet, BitVec};
+    /// use alt_collections::{BitSet, BitVec};
     ///
     /// let a   = 0b01101000;
     /// let b   = 0b10100000;
@@ -1554,7 +1554,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::{BitSet, BitVec};
+    /// use alt_collections::{BitSet, BitVec};
     ///
     /// let a   = 0b01101000;
     /// let b   = 0b10100000;
@@ -1587,7 +1587,7 @@ impl BitSet {
     ///
     /// ```
     /// # #![feature(collections)]
-    /// use alt_bitset::{BitSet, BitVec};
+    /// use alt_collections::{BitSet, BitVec};
     ///
     /// let a   = 0b01101000;
     /// let b   = 0b10100000;

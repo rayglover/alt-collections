@@ -14,12 +14,12 @@
 #![feature(step_by)] 
 
 extern crate test;
-extern crate alt_bitset; 
+extern crate alt_collections; 
 
 use std::cmp::Ordering::{Equal, Greater, Less};
 
 #[cfg(feature = "std")] use std::collections::{BitSet, BitVec};
-#[cfg(not(feature = "std"))] use alt_bitset::{BitSet, BitVec};
+#[cfg(not(feature = "std"))] use alt_collections::{BitSet, BitVec};
 
 #[test]
 fn test_bit_set_show() {
