@@ -99,7 +99,7 @@ type MatchWords<'a> = Chain<Enumerate<Blocks<'a>>, Skip<Take<Enumerate<Repeat<u3
 
 #[inline]
 fn reverse_bits(byte: u8) -> u8 {
-    // Rich Schroeppel in the Programming Hacks section of Beeler, M., Gosper, R. W., 
+    // Rich Schroeppel in the Programming Hacks section of Beeler, M., Gosper, R. W.,
     // and Schroeppel, R. HAKMEM. MIT AI Memo 239, Feb. 29, 1972
     ((byte as u64 * 0x0202020202 & 0x010884422010) % 1023) as u8
 }
@@ -1375,7 +1375,7 @@ impl BitSet {
     /// }
     /// ```
     #[inline]
-    pub fn iter<'a>(&'a self) -> bit_set::Iter<'a> {
+    pub fn iter(&self) -> bit_set::Iter {
         SetIter(BlockIter::from_blocks(self.bit_vec.blocks()))
     }
 
@@ -1401,7 +1401,7 @@ impl BitSet {
         fn or(w1: u32, w2: u32) -> u32 { w1 | w2 }
         Union(BlockIter::from_blocks(TwoBitPositions {
             set: self.bit_vec.blocks(),
-            other: other.bit_vec.blocks(), 
+            other: other.bit_vec.blocks(),
             merge: or,
         }))
     }
@@ -1427,10 +1427,10 @@ impl BitSet {
     pub fn intersection<'a>(&'a self, other: &'a BitSet) -> Intersection<'a> {
         fn bitand(w1: u32, w2: u32) -> u32 { w1 & w2 }
         let min = cmp::min(self.bit_vec.len(), other.bit_vec.len());
-        
+
         Intersection(BlockIter::from_blocks(TwoBitPositions {
             set: self.bit_vec.blocks(),
-            other: other.bit_vec.blocks(), 
+            other: other.bit_vec.blocks(),
             merge: bitand,
         }).take(min))
     }
@@ -1462,10 +1462,10 @@ impl BitSet {
     #[inline]
     pub fn difference<'a>(&'a self, other: &'a BitSet) -> Difference<'a> {
         fn diff(w1: u32, w2: u32) -> u32 { w1 & !w2 }
-        
+
         Difference(BlockIter::from_blocks(TwoBitPositions {
             set: self.bit_vec.blocks(),
-            other: other.bit_vec.blocks(), 
+            other: other.bit_vec.blocks(),
             merge: diff,
         }))
     }
@@ -1491,10 +1491,10 @@ impl BitSet {
     #[inline]
     pub fn symmetric_difference<'a>(&'a self, other: &'a BitSet) -> SymmetricDifference<'a> {
         fn bitxor(w1: u32, w2: u32) -> u32 { w1 ^ w2 }
-        
+
         SymmetricDifference(BlockIter::from_blocks(TwoBitPositions {
             set: self.bit_vec.blocks(),
-            other: other.bit_vec.blocks(), 
+            other: other.bit_vec.blocks(),
             merge: bitxor,
         }))
     }
@@ -1706,16 +1706,14 @@ impl hash::Hash for BitSet {
     }
 }
 
-/// An iterator for `BitSet`.
 #[derive(Clone)]
-struct BlockIter<T> where
-    T: Iterator<Item=u32> {
-    head: u32, 
+struct BlockIter<T> where T: Iterator<Item=u32> {
+    head: u32,
     head_offset: usize,
-    tail: T
+    tail: T,
 }
-impl<'a, T> BlockIter<T> where
-    T: Iterator<Item=u32> {
+
+impl<'a, T> BlockIter<T> where T: Iterator<Item=u32> {
     fn from_blocks(mut blocks: T) -> BlockIter<T> {
         let h = blocks.next().unwrap_or(0);
         BlockIter {tail: blocks, head: h, head_offset: 0}
@@ -1727,7 +1725,7 @@ impl<'a, T> BlockIter<T> where
 struct TwoBitPositions<'a> {
     set: Blocks<'a>,
     other: Blocks<'a>,
-    merge: fn(u32, u32) -> u32
+    merge: fn(u32, u32) -> u32,
 }
 
 #[derive(Clone)]
@@ -1752,16 +1750,20 @@ impl<'a, T> Iterator for BlockIter<T> where T: Iterator<Item=u32> {
         while self.head == 0 {
             match self.tail.next() {
                 Some(w) => self.head = w,
-                _ => return None
+                None => return None
             }
             self.head_offset += u32::BITS;
         }
 
-        let t = self.head & !self.head + 1;
-        // remove the least significant bit
+        // from the current block, isolate the
+        // LSB and subtract 1, producing k:
+        // a block with a number of set bits
+        // equal to the index of the LSB
+        let k = (self.head & (!self.head + 1)) - 1;
+        // update block, removing the LSB
         self.head &= self.head - 1;
-        // return index of lsb
-        Some(self.head_offset + (u32::count_ones(t-1) as usize))
+        // return offset + (index of LSB)
+        Some(self.head_offset + (u32::count_ones(k) as usize))
     }
 
     #[inline]
@@ -1786,12 +1788,16 @@ impl<'a> Iterator for TwoBitPositions<'a> {
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let (a, al) = self.set.size_hint();
-        let (b, bl) = self.set.size_hint();
+        let (a, au) = self.set.size_hint();
+        let (b, bu) = self.other.size_hint();
 
-        assert_eq!(a, b);
-        (a, cmp::max(al, bl))
-    }   
+        let upper = match (au, bu) {
+            (Some(au), Some(bu)) => Some(cmp::max(au, bu)),
+            _ => None
+        };
+
+        (cmp::max(a, b), upper)
+    }
 }
 impl<'a> Iterator for SetIter<'a> {
     type Item = usize;
